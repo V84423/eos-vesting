@@ -33,3 +33,4 @@ Add the asset
 
 ```cleos -u https://ore-staging.openrights.exchange push action comakeryteam claim '{"vesting_id": 0}' -p <vesting_account>@<permission>```
 
+
