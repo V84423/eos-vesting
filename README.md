@@ -23,6 +23,10 @@ Add the asset
 
 ### Add eosio.code active permissions
 
+You need to add eosio.code permissions to contract and depositors. For example:
+
+```cleos set account permission depositaccnt active depositaccnt --add-code```
+
 ```cleos set account permission comakeryteam active comakeryteam --add-code```
 
 ### Add vesting
