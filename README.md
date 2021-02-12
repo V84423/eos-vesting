@@ -37,4 +37,13 @@ You need to add eosio.code permissions to contract and depositors. For example:
 
 ```cleos -u https://ore-staging.openrights.exchange push action comakeryteam claim '{"vesting_id": 0}' -p <vesting_account>@<permission>```
 
+### Run local node and install system contracts
 
+```
+docker-compose up -d
+./ignition.sh
+```
+
+The first step runs the local EOS node
+
+The second step runs deployment system contracts

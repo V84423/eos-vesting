@@ -1,0 +1,9 @@
+version: '2'
+
+services:
+   nodeos:
+     build:
+       context: .
+     container_name: nodeos
+     ports:
+       - "8888:8888"
