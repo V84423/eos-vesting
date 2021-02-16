@@ -8,5 +8,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: isbang/compose-action@v0.2.0
+    - uses: actions/checkout@v1
     - name: run test shell script
-      run: ./.github/ignition.sh
+      run: pwd && ls && ./ignition.sh
