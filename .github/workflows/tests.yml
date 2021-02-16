@@ -9,4 +9,4 @@ jobs:
     steps:
     - uses: isbang/compose-action@v0.2.0
     - name: run test shell script
-      run: ./ignition.sh
+      run: ./.github/ignition.sh
