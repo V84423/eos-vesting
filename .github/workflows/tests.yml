@@ -1,0 +1,12 @@
+name: Run Smart Contract Tests
+
+on: [push]
+    
+jobs:
+  my_job:
+    name: Private Network Docker Smart Contract Test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: isbang/compose-action@v0.2.0
+    - name: run test shell script
+      run: ./ignition.sh
