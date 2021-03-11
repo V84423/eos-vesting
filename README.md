@@ -3,7 +3,9 @@ For build EOS contracts you need download eosio-cpp 1.7.0 and EOS binaries https
 
 Build command
 
-```eosio-cpp -I=cmkryvesting/include cmkryvesting/src/cmkryvesting.cpp -o cmkryvesting/cmkryvesting.wasm```
+```
+eosio-cpp -I=$PWD/cmkryvesting/include $PWD/cmkryvesting/src/cmkryvesting.cpp -o $PWD/cmkryvesting/cmkryvesting.wasm
+```
 
 After build the wasm you need to create the local wallet to deploy the contract
 
