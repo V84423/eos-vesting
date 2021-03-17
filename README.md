@@ -49,3 +49,137 @@ docker-compose up -d
 The first step runs the local EOS node
 
 The second step runs deployment system contracts
+
+# Specification
+
+The vesting contract has these features:
+
+* Deployable to the EOS, ORE or Telos based blockchain
+  * https://aikon.com/ore-blockchain
+  * https://explorer.ore.network
+* Reusable for EOS tokens and tokens on Telos blockchains such as ORE token
+
+- A single vesting contract handles vesting escrows for multiple people. It is only deployed once.
+
+- For each token recipient account an admin can specify: 
+
+  1.  An amount to be granted after a period of time (“cliff”). For example 30% of tokens will be available for withdrawal after a 1 year period.
+  2.  The remaining tokens will be distributed in monthly portions after the cliff. For example 1/36 of tokens will be available on the first day of each month after the cliff date. Note that the final period will be uneven due to rounding.
+
+- An admin can pause the vesting on the account. 
+
+- An admin can cancel the vesting for an account.
+
+- An admin can reclaim the unvested token amount.
+
+- After vesting or transfer there may be a separate lockup period. Unlike a vesting period, the tokens cannot be reclaimed by the issuer prior to the vesting date.
+
+- Once the tokens are fully vested and the lockup period is over the recipient may transfer them wherever they like. 
+
+- Vestings may have been promised in the past with the vestings contract token allocation configured later. So the calculation of vested and locked tokens should be able to use a start date in the past for vested and locked tokens.
+
+- An admin can grant more than one vesting to the same recipient address.
+
+- The vesting period defaults to monthly but can be set to monthly, weekly, daily and continuous. Continuous evenly vests the tokens with each verified block timestamp. The vesting occurs on the first moment of the vesting period such as midnight on the first of the month or midnight on the first day of the week, etc.
+
+  <div style="page-break-after: always; break-after: page;"></div>
+
+## Smart Contract Interface Pseudocode
+
+The smart contract should implement the following or similar functions. Use unsigned ints or ints or make other changes as you see fit during development.
+
+#### Admin Contract Configuration Functions Pseudocode
+
+```cpp
+void setToken(tokenAddress or identifier) //sets the token that is managed
+
+void deposit(amount) //deposit tokens into the pool that are available for allocation
+
+void withdraw(amount) //withdraw tokens from the pool that are available for allocation but not allocated
+  
+void getUnallocatedBalance() //returns the balance of unallocated tokens
+
+void getAllocatedBalance() // returns the balance of allocated tokens
+
+int getBalance() // returns the balance of allocated and unallocated tokens
+  
+void addAdmin(address) // adds an admin who can administrate the contract
+  
+void removeAdmin(address) // removes an admin. Does not allow less than 1 admin for the contract.
+```
+
+  <div style="page-break-after: always; break-after: page;"></div>
+
+#### Admin Vesting Configuration Functions Pseudocode
+
+```cpp
+int createVesting(recipientAddress, amount, startDate, endDate, vestingPeriod=defaultMonthly, lockedUntilDate=defaultNone, cliffDate=defaultNone, cliffTokenAmount=defaultNone) // create a vesting and return the allocationId. Keep in mind that one recipient address can have multiple allocation.
+
+int createAllocation(recipientAddress, amount, lockedUntilDate=defaultNoLockup) // create an allocation and return the allocationId. Keep in mind that one recipient address can have multiple allocations.
+
+  
+void cancelVesting(allocationId, pauseTime=defaultToNow) // cancels the vesting at a vesting time that is not in the past
+  
+void pauseVesting(allocationId, pauseTime=defaultToNow) // pauses the vesting at a vesting time that is not in the past
+  
+void unpauseVesting(allocationId, pauseTime=defaultToNow) // unpauses the vesting at a vesting time that is not in the past
+```
+
+#### Recipient Functions Pseudocode
+
+```cpp
+int transferTokens(amount, recipientAddress) // can only transfer vested and unlocked tokens
+
+int getTransferableBalance(allocationId) // can only transfer vested and unlocked tokens
+
+int getLockedBalance(allocationId)
+
+int getLockedUntilDate(allocationId)
+
+int getUnvestedBalance(allocationId)
+
+??? getAllocationInfo(allocationId) // get summary of information about the allocation including vesting schedule
+```
+
+  <div style="page-break-after: always; break-after: page;"></div>
+
+## Examples
+
+#### 4 year vesting with 1 year cliff
+
+* An employee is allocated 48,000 TKN tokens with a start date of  June 1, 2019
+* 25% of the tokens (12,000 TKN) are scheduled to vest on the "cliff date" of June 1, 2020
+* 1/36 of the remaining 36,000 tokens vest on the first day of each calendar month (1,000 TKN per month)
+* The contract is configured on January 5th, 2021 with the backdated start date, cliff date and vesting schedule
+* When the contract is configured on Jan 5th, 2021 the employee has vested the 12,000 TKN cliff amount and 7,000 TKN for the 7 monthly vestings occuring on the first day of July 2020 through January 2021.
+* The employee can transfer 19,000 TKN as there is no lockup period. 
+* 29,000 TKN tokens remain unvested in January.
+
+#### Investor transfer with lockup period
+
+* An investor purchases 100,000 TKN on June 15, 2020 at 1:23pm UTC with a 1 year lockup period.
+* The contract admin configures the token contract for the investors tokens on Jan 5, 2021
+* As of Jan 5 the investor cannot transfer the tokens and the contract admin cannot reclaim them
+* The investor can transfer the tokens exactly 1 year later on June 15, 2021 at 1:23pm UTC
+
+#### 2 year vesting with cancelation
+
+* An employee is allocated 24,000 TKN tokens with a start date of  January 1, 2020
+* The tokens vest evenly on the first day of each calendar month (1,000 TKN per month)
+* The contract is configured on January 5th, 2021 with the backdated start date and vesting schedule
+* When the contract is configured on Jan 5th, 2021 the employee has vested 13,000 tokens (12 months in 2020 + Jan 1, 2021 = 13 vestings)
+* The employee is fired on January 20th, 2021 and the contract is canceled
+* The employee can transfer 13,000 tokens and the contract admin can transfer or reallocate the remaining 11,000 TKN tokens from the vesting contract token pool
+* Without withdrawing the tokens from the vesting contract, the contract admin allocates the tokens to another employee with a 12 month vesting schedule.
+
+#### 2 year vesting with paused contract
+
+* An employee is allocated 24,000 TKN tokens with a start date of  January 1, 2020
+* The tokens vest evenly on the first day of each calendar month (1,000 TKN per month)
+* The contract is configured on January 5th, 2021 with the backdated start date and vesting schedule
+* When the contract is configured on Jan 5th, 2021 the employee has vested 13,000 tokens (12 months in 2020 + Jan 1, 2021 = 13 vestings)
+* The employee goes on sabbatical on January 20th, 2021 but the company wants to be able to restart their vesting later.
+* The vesting for the remaining 11,000 tokens for the employee address is paused
+* The employee returns to work and the vesting is unpaused on January 2nd, 2022
+* On February 1, 2022 the employee receives their next vesting of 1,000 tokens and 10,000 tokens remain
+* The remaining 10,000 tokens vest at a rate of 1,000 tokens on the first day of each month from March 1, 2022 through December 1, 2022
