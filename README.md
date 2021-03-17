@@ -183,3 +183,14 @@ int getUnvestedBalance(allocationId)
 * The employee returns to work and the vesting is unpaused on January 2nd, 2022
 * On February 1, 2022 the employee receives their next vesting of 1,000 tokens and 10,000 tokens remain
 * The remaining 10,000 tokens vest at a rate of 1,000 tokens on the first day of each month from March 1, 2022 through December 1, 2022
+
+#### Vesting & lockup together
+
+* The employee received a 100 day vesting with a 100 day lockup for 100 tokens.
+* The start date is set to 50 days ago,
+* The employee is fired and the remaining vesting is canceled.
+* The admin reclaims the 50 unvested tokens.
+* The employee owns 50 tokens but they are still locked until the lockup period is over.
+* The admin tries to claim the 50 vested employee owned tokens but the reclaim fails.
+* 99 days from the start date the employee tries to transfer 50 tokens but the transfer fails because they are still locked.
+100 days from the start date the tokens unlock and the ex-employee transfers their 50 tokens successfully.
