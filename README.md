@@ -1,5 +1,26 @@
-### Build and deploy contract cmkryvesting
+## Build and deploy contract cmkryvesting
 For build EOS contracts you need download eosio-cpp 1.7.0 and EOS binaries https://developers.eos.io/manuals/eos/latest/install/install-prebuilt-binaries
+
+### To build contracts alone
+
+Run the `build.sh` script in the top directory to build all the contracts.
+
+```sh
+./build.sh
+```
+
+All .wasm and .abi files will be located in the `build/cmkryvesting` directory
+
+### To build the contracts and unit tests
+
+1. Ensure an appropriate version of eosio has been built from source and installed. Installing eosio from binaries is not sufficient.
+2. Run the build.sh script in the top directory with the -t flag to build all the contracts and the unit tests for these contracts.
+
+```sh
+./build.sh -t
+```
+
+Unit test will be located in the `build/cmkryvesting_tests` directory
 
 Build command
 
