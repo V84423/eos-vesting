@@ -22,12 +22,6 @@ All .wasm and .abi files will be located in the `build/cmkryvesting` directory
 
 Unit test will be located in the `build/cmkryvesting_tests` directory
 
-Build command
-
-```
-eosio-cpp -I=$PWD/cmkryvesting/include $PWD/cmkryvesting/src/cmkryvesting.cpp -o $PWD/cmkryvesting/cmkryvesting.wasm
-```
-
 After build the wasm you need to create the local wallet to deploy the contract
 
 ```cleos  wallet create --to-console```
