@@ -330,7 +330,7 @@ static void contract_set(TESTER &chain) {
                 "../../../plt-eoscdt-contract/cmake-build-debug/basic_contracts/testing/eosio.token/eosio.token.wasm",
                 "../../../plt-eoscdt-contract/basic_contracts/testing/eosio.token/eosio.token.abi"
     );
-    wasmabi_set(chain, DAPPSERVICES,
+    /*wasmabi_set(chain, DAPPSERVICES,
                 "../../../plt-eoscdt-contract/cmake-build-debug/basic_contracts/testing/dappservices/dappservices.wasm",
                 "../../../plt-eoscdt-contract/basic_contracts/testing/dappservices/dappservices.abi"
     );
@@ -340,7 +340,7 @@ static void contract_set(TESTER &chain) {
     wasmabi_set(chain, TETHERTETHER,
                 "../../../plt-eoscdt-contract/cmake-build-debug/basic_contracts/testing/eosio.token/eosio.token.wasm",
                 "../../../plt-eoscdt-contract/basic_contracts/testing/eosio.token/eosio.token.abi"
-    );
+    );*/
     tokens_create(chain);
     token_issue(chain, N(eosio), EOS(800000000));
 
@@ -350,21 +350,21 @@ static void contract_set(TESTER &chain) {
     );
     PUSH_CONSOLE(chain, N(eosio), N(init), N(eosio), mvo()("version", 0)("core", EOS_SYMBOL));
 
-    wasmabi_set(chain, EOSDTORCLIZE);
+    /*wasmabi_set(chain, EOSDTORCLIZE);
     wasmabi_set(chain, EOSDTCNTRACT);
 
     wasmabi_set(chain, N(provableconn),
                 "../../../plt-eoscdt-contract/contracts/testing/provableconn/provableconn.wasm",
                 "../../../plt-eoscdt-contract/contracts/testing/provableconn/provableconn.abi"
-    );
+    );*/
 
-    set_orasettings(chain);
+    //set_orasettings(chain);
 
-    wasmabi_set(chain, EOSDTLIQDATR);
+    /*wasmabi_set(chain, EOSDTLIQDATR);
     wasmabi_set(chain, EOSDTGOVERNC);
     wasmabi_set(chain, EOSDTEXCHANG);
     wasmabi_set(chain, TOKENSWAP_EQ);
-    wasmabi_set(chain, EOSLOTTERYEQ);
+    wasmabi_set(chain, EOSLOTTERYEQ);*/
     wasmabi_set(chain, CMKRYVESTING);
     //wasmabi_set(chain,EOSIO_EVM,
     //            "../../../plt-eoscdt-contract/cmake-build-debug/contracts/testing/eosio.evm/eosio.evm/eosio.evm.wasm",
