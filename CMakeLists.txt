@@ -1,56 +1,94 @@
 cmake_minimum_required(VERSION 3.5)
-project(contracts NONE)
-set(CMAKE_BUILD_TYPE Release)
-set(EOSIO_WASM_OLD_BEHAVIOR "On")
-list(APPEND CMAKE_PREFIX_PATH "~/opt/eosio.cdt")
-add_subdirectory(eosdtcntract)
-add_subdirectory(eosdtexchang)
-add_subdirectory(eosdtgovernc)
-add_subdirectory(equiguardian)
-add_subdirectory(eosdtliqdatr)
-add_subdirectory(eosdtlockupp)
-add_subdirectory(eosdtnutoken)
-add_subdirectory(eosdtorclize)
-add_subdirectory(eosdtreserve)
-add_subdirectory(eosdtsttoken)
-add_subdirectory(eosdttestest)
-add_subdirectory(fakeeliqdatr)
-add_subdirectory(eosdefivotes)
-add_subdirectory(eosdtarmseos)
-add_subdirectory(eos2dtdotcom)
-add_subdirectory(eosdtposcont)
-add_subdirectory(eosdtkgtoken)
-add_subdirectory(eosdtontoken)
-add_subdirectory(eosdtsavings)
-add_subdirectory(fakeennewdex)
-add_subdirectory(fakeelloantp)
-add_subdirectory(tokenswap.eq)
-add_subdirectory(eoslotteryeq)
-add_subdirectory(cmkryvesting)
-add_custom_target(eosdt)
-add_dependencies(eosdt
-        eosdtcntract.wasm
-        eosdtexchang.wasm
-        eosdtgovernc.wasm
-        equiguardian.wasm
-        eosdtliqdatr.wasm
-        eosdtlockupp.wasm
-        eosdtnutoken.wasm
-        eosdtorclize.wasm
-        eosdtreserve.wasm
-        eosdtsttoken.wasm
-        eosdttestest.wasm
-        fakeeliqdatr.wasm
-        eosdefivotes.wasm
-        eosdtarmseos.wasm
-        eos2dtdotcom.wasm
-        eosdtposcont.wasm
-        eosdtkgtoken.wasm
-        eosdtontoken.wasm
-        eosdtsavings.wasm
-        fakeennewdex.wasm
-        fakeelloantp.wasm
-        tokenswap.eq.wasm
-        eoslotteryeq.wasm
-        ##cmkryvesting.wasm
-        )
+
+project(eosio_contracts)
+
+set(VERSION_MAJOR 1)
+set(VERSION_MINOR 9)
+set(VERSION_PATCH 2)
+#set(VERSION_SUFFIX rc4)
+
+if (VERSION_SUFFIX)
+   set(VERSION_FULL "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}-${VERSION_SUFFIX}")
+else()
+   set(VERSION_FULL "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
+endif()
+
+include(ExternalProject)
+
+find_package(eosio.cdt)
+
+message(STATUS "Building eosio.contracts v${VERSION_FULL}")
+
+set(EOSIO_CDT_VERSION_MIN "1.7")
+set(EOSIO_CDT_VERSION_SOFT_MAX "1.7")
+#set(EOSIO_CDT_VERSION_HARD_MAX "")
+
+### Check the version of eosio.cdt
+set(VERSION_MATCH_ERROR_MSG "")
+EOSIO_CHECK_VERSION(VERSION_OUTPUT "${EOSIO_CDT_VERSION}"
+                                   "${EOSIO_CDT_VERSION_MIN}"
+                                   "${EOSIO_CDT_VERSION_SOFT_MAX}"
+                                   "${EOSIO_CDT_VERSION_HARD_MAX}"
+                                   VERSION_MATCH_ERROR_MSG)
+if(VERSION_OUTPUT STREQUAL "MATCH")
+   message(STATUS "Using eosio.cdt version ${EOSIO_CDT_VERSION}")
+elseif(VERSION_OUTPUT STREQUAL "WARN")
+   message(WARNING "Using eosio.cdt version ${EOSIO_CDT_VERSION} even though it exceeds the maximum supported version of ${EOSIO_CDT_VERSION_SOFT_MAX}; continuing with configuration, however build may fail.\nIt is recommended to use eosio.cdt version ${EOSIO_CDT_VERSION_SOFT_MAX}.x")
+else() # INVALID OR MISMATCH
+   message(FATAL_ERROR "Found eosio.cdt version ${EOSIO_CDT_VERSION} but it does not satisfy version requirements: ${VERSION_MATCH_ERROR_MSG}\nPlease use eosio.cdt version ${EOSIO_CDT_VERSION_SOFT_MAX}.x")
+endif(VERSION_OUTPUT STREQUAL "MATCH")
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+   set(TEST_BUILD_TYPE "Debug")
+   set(CMAKE_BUILD_TYPE "Release")
+else()
+   set(TEST_BUILD_TYPE ${CMAKE_BUILD_TYPE})
+endif()
+
+ExternalProject_Add(
+   contracts_project
+   SOURCE_DIR ${CMAKE_SOURCE_DIR}/cmkryvesting
+   BINARY_DIR ${CMAKE_BINARY_DIR}/cmkryvesting
+   CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${EOSIO_CDT_ROOT}/lib/cmake/eosio.cdt/EosioWasmToolchain.cmake
+   UPDATE_COMMAND ""
+   PATCH_COMMAND ""
+   TEST_COMMAND ""
+   INSTALL_COMMAND ""
+   BUILD_ALWAYS 1
+)
+
+if (APPLE)
+   set(OPENSSL_ROOT "/usr/local/opt/openssl")
+elseif (UNIX)
+   set(OPENSSL_ROOT "/usr/include/openssl")
+endif()
+set(SECP256K1_ROOT "/usr/local")
+
+if (APPLE)
+   set(OPENSSL_ROOT "/usr/local/opt/openssl")
+elseif (UNIX)
+   set(OPENSSL_ROOT "/usr/include/openssl")
+endif()
+set(SECP256K1_ROOT "/usr/local")
+
+string(REPLACE ";" "|" TEST_PREFIX_PATH "${CMAKE_PREFIX_PATH}")
+string(REPLACE ";" "|" TEST_FRAMEWORK_PATH "${CMAKE_FRAMEWORK_PATH}")
+string(REPLACE ";" "|" TEST_MODULE_PATH "${CMAKE_MODULE_PATH}")
+
+set(BUILD_TESTS FALSE CACHE BOOL "Build unit tests")
+
+if(BUILD_TESTS)
+   message(STATUS "Building unit tests.")
+   ExternalProject_Add(
+     contracts_unit_tests
+     LIST_SEPARATOR | # Use the alternate list separator
+     CMAKE_ARGS -DCMAKE_BUILD_TYPE=${TEST_BUILD_TYPE} -DCMAKE_PREFIX_PATH=${TEST_PREFIX_PATH} -DCMAKE_FRAMEWORK_PATH=${TEST_FRAMEWORK_PATH} -DCMAKE_MODULE_PATH=${TEST_MODULE_PATH} -DEOSIO_ROOT=${EOSIO_ROOT} -DLLVM_DIR=${LLVM_DIR} -DBOOST_ROOT=${BOOST_ROOT}
+     SOURCE_DIR ${CMAKE_SOURCE_DIR}/cmkryvesting_tests
+     BINARY_DIR ${CMAKE_BINARY_DIR}/cmkryvesting_tests
+     BUILD_ALWAYS 1
+     TEST_COMMAND   ""
+     INSTALL_COMMAND ""
+   )
+else()
+   message(STATUS "Unit tests will not be built. To build unit tests, set BUILD_TESTS to true.")
+endif()
