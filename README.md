@@ -1,4 +1,4 @@
-## Build and deploy contract cmkryvesting
+## Build and deploy contract cmkryvesting.
 For build EOS contracts you need download eosio-cpp 1.7.0 and EOS binaries https://developers.eos.io/manuals/eos/latest/install/install-prebuilt-binaries
 
 ### To build contracts alone
